@@ -3,6 +3,41 @@
 import subprocess as sp
 import re
 
+def get_aps2(iface="wlan0"):
+  '''return a list of dictionnaries with access point info from iw'''
+  proc = sp.Popen(["sudo","iw","dev",iface,"scan","ap-force"], stdout = sp.PIPE, stderr = sp.PIPE)
+
+  #get info on the access points
+  aps = []
+  info = {}
+  for line in iter(proc.stdout.readline,''):
+
+    rline = line.rstrip()
+    #Each new entry starts with BSS as the first 3 characters
+    if rline.find("BSS ") > -1 and rline.find('BSS') < 2 :
+      if 'mac' in info:
+        #This is not the first channel, dump info and append to aps:
+        aps.append(info)
+        info = {}
+      info['mac']=rline.split("BSS ")[1].split('(')[0]
+
+    if rline.find("SSID") > -1:
+      id = rline.split('SSID: ')[1]
+      info['ssid'] = id
+
+    if rline.find("signal: ") > -1:
+      signal = rline.split('signal: ')[1]
+      info['signal'] = signal
+
+
+  #add the last one to the list
+  if 'mac' in info:
+    aps.append(info)
+
+  return aps
+
+
+
 def get_aps(iface="wlan0"):
   '''return a list of dictionnaries with access point info from iwlist'''
   proc = sp.Popen(["iwlist", iface, "scan"], stdout = sp.PIPE, stderr = sp.PIPE)

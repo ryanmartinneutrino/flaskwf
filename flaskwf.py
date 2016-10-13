@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template
-from wifi import get_aps, get_connection_info
+from wifi import get_aps2, get_connection_info
 app = Flask(__name__)
 
 @app.route('/', methods = ['POST', 'GET'])
 def wifilist():
-  aps = get_aps('wlan0') 
+  aps = get_aps2('wlan0') 
   conn_info = get_connection_info('wlan0')
   if request.method == 'POST':
     pwd=request.form['pwd']
