@@ -16,7 +16,7 @@
                <td> {{ ap['mac']  }} </td>
                <td> {{ ap['signal']  }} </td>
                <td> 
-                   <form action = "http://192.168.1.103:5000" method = "POST">
+                   <form action = "http://{{ conn_info['ip'] }}:5000" method = "POST">
                    <input type = "hidden" name = "ssid" value= "{{ ap['ssid'] }}">
                    Password: <input type = "text" name = "pwd">
                    <input type = "submit" value = "Connect" />
@@ -26,6 +26,15 @@
             
          {% endfor %}
       </table>
+   <br>
+   <h1> Run as access point </h1>
+     <form action = "http://{{ conn_info['ip'] }}:5000" method = "POST">
+       Password: <input type = "text" name = "pwd"><br>
+       Network Name: <input type = "text" name = "ssid" value = "flaskwf"><br>
+       IP: <input type = "text" name = "ip" value = "10.10.0.0"><br>
+       <input type = "submit" value = "Run as AP" />
+     </form>
+   
       
    </body>
 </html>

@@ -3,6 +3,13 @@
 import subprocess as sp
 import re
 
+def write_wpa_file(ssid, pwd):
+  '''Write the wpa_supplicant file'''
+  wfile = open ("wpa_supplicant.conf", "w")
+  info = "network={\n ssid=\"" + ssid + "\"\n psk=\"" + pwd + "\"\n}"
+  wfile.write(info)
+  wfile.close()
+
 def get_aps2(iface="wlan0"):
   '''return a list of dictionnaries with access point info from iw'''
   proc = sp.Popen(["sudo","iw","dev",iface,"scan","ap-force"], stdout = sp.PIPE, stderr = sp.PIPE)
@@ -14,7 +21,7 @@ def get_aps2(iface="wlan0"):
 
     rline = line.rstrip()
     #Each new entry starts with BSS as the first 3 characters
-    if rline.find("BSS ") > -1 and rline.find('BSS') < 2 :
+    if rline.find("BSS ") > -1 and rline.find(iface) > -1 :
       if 'mac' in info:
         #This is not the first channel, dump info and append to aps:
         aps.append(info)
