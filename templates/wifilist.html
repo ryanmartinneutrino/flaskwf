@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+   <body>
+   <h1> Interface info</h1>
+   Interface: {{ conn_info['iface']}} <br>
+   MAC Addr: {{ conn_info['mac']}} <br>
+   IP Addr: {{ conn_info['ip']}} <br>
+   <br>
+   <h1>Choose a wifi network to connect to:</h1>
+   <br>
+      <table border = 1>
+         {% for ap in aps %}
+         
+            <tr>
+               <th> {{ ap['ssid'] }} </th>
+               <td> {{ ap['mac']  }} </td>
+               <td> 
+                   <form action = "http://192.168.1.103:5000" method = "POST">
+                   <input type = "hidden" name = "ssid" value= "{{ ap['ssid'] }}">
+                   Password: <input type = "text" name = "pwd">
+                   <input type = "submit" value = "Connect" />
+                   </form>
+               </td>
+            </tr>
+            
+         {% endfor %}
+      </table>
+      
+   </body>
+</html>
