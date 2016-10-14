@@ -10,6 +10,13 @@ def write_wpa_file(ssid, pwd):
   wfile.write(info)
   wfile.close()
 
+def write_hostapd_conf(iface, ssid, pwd, ip):
+  '''Create the hostapd.conf file'''
+  hfile = open("hostapd.conf", "w")
+  info = "interface="+iface+"\n ssid="+ssid
+  hfile.write(info)
+  hfile.close()
+
 def get_aps2(iface="wlan0"):
   '''return a list of dictionnaries with access point info from iw'''
   proc = sp.Popen(["sudo","iw","dev",iface,"scan","ap-force"], stdout = sp.PIPE, stderr = sp.PIPE)
