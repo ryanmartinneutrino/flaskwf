@@ -18,7 +18,7 @@ def wifilist():
       #connect to a wifi
       pwd=request.form['pwd']
       ssid=request.form['ssid']
-      wf.write_wpa_file(ssid, pwd)
+      wf.connect_wifi(ssid, pwd)
       message = 'wrote wpa_supplicant.conf'
 
     if 'ap' in request.form: 
@@ -26,13 +26,15 @@ def wifilist():
       ssid=request.form['apssid']
       ip=request.form['apip']      
       wf.write_hostapd_conf('wlan0', ssid, pwd, ip)
-      wf.write_network_interfaces_file_AP(ip, iface='wlan0' )
+      wf.write_network_interfaces_AP(ip, iface='wlan0' )
       message = 'wrote hostapd.conf and interfaces'
 
     if 'scan' in request.form:    
       aps = wf.get_aps2('wlan0')
       message = 'done scanning'
- 
+
+  else:
+    aps = wf.get_aps2('wlan0') 
   return render_template("wifilist.html",aps = aps, conn_info = conn_info, message=message)
 
 

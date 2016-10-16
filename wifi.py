@@ -2,8 +2,18 @@
 
 import subprocess as sp
 import re
+import os
 
-def write_wpa_file(ssid, pwd):
+def connect_wifi(ssid, pwd, iface='wlan0'):
+  write_wpa_conf(ssid, pwd)
+  sp.call('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.bak', shell=True)
+  sp.call('sudo cp wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf',shell=True)
+  sp.call('sudo ifdown '+iface, shell=True)
+  sp.call('sudo ifup '+iface, shell=True)
+
+
+
+def write_wpa_conf(ssid, pwd):
   '''Write the wpa_supplicant file'''
   wfile = open ("wpa_supplicant.conf", "w")
   info = "network={\n ssid=\"" + ssid + "\"\n psk=\"" + pwd + "\"\n}"
@@ -30,7 +40,7 @@ rsn_pairwise=CCMP\n\
   hfile.write(info)
   hfile.close()
 
-def write_network_interfaces_file_AP(ip = '10.10.0.0', iface='wlan0' ):
+def write_network_interfaces_AP(ip = '10.10.0.0', iface='wlan0' ):
   '''Write the /etc/network/interfaces file for AP mode'''
   network = '10.10.0.0'
   info = "\
