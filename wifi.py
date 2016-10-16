@@ -12,10 +12,42 @@ def write_wpa_file(ssid, pwd):
 
 def write_hostapd_conf(iface, ssid, pwd, ip):
   '''Create the hostapd.conf file'''
+
+  info = "\
+interface={} \n\
+ssid={} \n\
+wpa_passphrase={}\n\
+hw_mode=g\n\
+channel=10\n\
+auth_algs=1\n\
+wpa=2\n\
+wpa_key_mgmt=WPA-PSK\n\
+wpa_pairwise=CCMP\n\
+rsn_pairwise=CCMP\n\
+".format(iface,ssid, pwd)
+  
   hfile = open("hostapd.conf", "w")
-  info = "interface="+iface+"\n ssid="+ssid
   hfile.write(info)
   hfile.close()
+
+def write_network_interfaces_file_AP(ip = '10.10.0.0', iface='wlan0' ):
+  '''Write the /etc/network/interfaces file for AP mode'''
+  network = '10.10.0.0'
+  info = "\
+allow-hotplug {}\n\
+iface {} inet static\n\
+	address {}\n\
+	netmask 255.255.255.0\n\
+	network {}\n\
+	broadcast 10.0.0.255\n\
+       	wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf\n\
+".format(iface,iface, ip, network)
+
+  hfile = open("interfaces", "w")
+  hfile.write(info)
+  hfile.close()
+
+
 
 def get_aps2(iface="wlan0"):
   '''return a list of dictionnaries with access point info from iw'''
