@@ -12,6 +12,13 @@ def connect_wifi(ssid, pwd, iface='wlan0'):
   sp.call('sudo ifup '+iface, shell=True)
 
 
+def start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wlan0'):
+
+  write_hostapd_conf(iface, ssid, pwd, ip)
+  write_network_interfaces_AP(ip, iface)
+  sp.call('sudo cp hostapd.conf /etc/hostapd/hostapd.conf',shell=True)  
+  sp.call('sudo cp interfaces /etc/network/interfaces',shell=True)  
+
 
 def write_wpa_conf(ssid, pwd):
   '''Write the wpa_supplicant file'''
@@ -40,10 +47,14 @@ rsn_pairwise=CCMP\n\
   hfile.write(info)
   hfile.close()
 
-def write_network_interfaces_AP(ip = '10.10.0.0', iface='wlan0' ):
+def write_network_interfaces_AP(ip = '10.10.0.1', iface='wlan0' ):
   '''Write the /etc/network/interfaces file for AP mode'''
   network = '10.10.0.0'
   info = "\
+auto lo\n\
+iface lo inet loopbac \n\
+iface eth0 inet dhcp\n\
+\n\
 allow-hotplug {}\n\
 iface {} inet static\n\
 	address {}\n\
