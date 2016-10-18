@@ -10,6 +10,7 @@ def wifilist():
 
   conn_info = wf.get_connection_info('wlan0')
   aps=[] #list of APs if scan was called
+
   message = '' 
 
   if request.method == 'POST':
@@ -34,8 +35,11 @@ def wifilist():
       message = 'done scanning'
 
   else:
-    aps = wf.get_aps2('wlan0') 
-  return render_template("wifilist.html",aps = aps, conn_info = conn_info, message=message)
+    aps = wf.get_aps('wlan0') 
+  return render_template("wifilist.html",aps = aps,
+                         conn_info = conn_info,
+                         message=message,
+                         url_root=request.url_root)
 
 
 if __name__ == '__main__':

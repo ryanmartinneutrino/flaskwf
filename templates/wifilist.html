@@ -7,7 +7,7 @@
    IP Addr: {{ conn_info['ip']}} <br>
    <br>
    <h1>Choose a wifi network to connect to:</h1>
-   <form action  = "http://{{ conn_info['ip'] }}:5000" method = "POST">
+   <form action  = "{{ url_root }}" method = "POST">
       <input type = "hidden" name = "scan" value= "True">
       <input type = "submit" value = "Scan" />
    <br> 
@@ -20,7 +20,7 @@
                <td> {{ ap['mac']  }} </td>
                <td> {{ ap['signal']  }} </td>
                <td> 
-                   <form action = "http://{{ conn_info['ip'] }}:5000" method = "POST">
+                   <form action = "{{ url_root  }}" method = "POST">
                    <input type = "hidden" name = "connect" value= "True">
                    <input type = "hidden" name = "ssid" value= "{{ ap['ssid'] }}">
                    Password: <input type = "text" name = "pwd">
@@ -34,7 +34,7 @@
    <br>
 
    <h1> Run as access point </h1>
-     <form action = "http://{{ conn_info['ip'] }}:5000" method = "POST">
+     <form action = "{{ url_root }}" method = "POST">
        <input type = "hidden" name = "ap" value= "True">
        Network Name: <input type = "text" name = "apssid" value = "flaskwf"><br>
        Password: <input type = "text" name = "appwd"><br>
