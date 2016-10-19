@@ -3,10 +3,13 @@
 import subprocess as sp
 import re
 import os
+import templater as tp
+
 
 def connect_wifi(ssid, pwd, iface='wlan0'):
-  write_wpa_conf(ssid, pwd)
-  write_network_interfaces_WF(iface)
+  tp.fill_template(file='wpa_supplicant.conf', values={'ssid':ssid, 'pwd':pwd})
+  tp.fill_template(file='interfaces.wifi', values={'iface':iface})
+  
   sp.call('sudo cp /etc/network/interfaces /etc/network/interfaces.bak',shell=True)  
   sp.call('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.bak', shell=True)
   sp.call('sudo cp wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf',shell=True)
@@ -30,17 +33,6 @@ def start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wl
   #sp.call('sudo  ', shell=True)
 
 
-def write_wpa_conf(ssid, pwd):
-  '''Write the wpa_supplicant file'''
-  wfile = open ("wpa_supplicant.conf", "w")
-  info ="\
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n\
-update_config=1\n\
-country=GB\n\
-"
-  info = "network={\n ssid=\"" + ssid + "\"\n psk=\"" + pwd + "\"\n key_mgmt=WPA-PSK\n  }"
-  wfile.write(info)
-  wfile.close()
 
 def write_hostapd_conf(iface, ssid, pwd, ip):
   '''Create the hostapd.conf file'''
@@ -48,6 +40,7 @@ def write_hostapd_conf(iface, ssid, pwd, ip):
   info = "\
 interface={} \n\
 ssid={} \n\
+driver=rtl871xdrv \n\
 wpa_passphrase={}\n\
 hw_mode=g\n\
 channel=10\n\
@@ -59,24 +52,6 @@ rsn_pairwise=CCMP\n\
 ".format(iface,ssid, pwd)
   
   hfile = open("hostapd.conf", "w")
-  hfile.write(info)
-  hfile.close()
-
-
-
-def write_network_interfaces_WF(iface='wlan0' ):
-  info = "\
-auto lo\n\
-iface lo inet loopback \n\
-iface eth0 inet dhcp\n\
-\n\
-#auto {iface}\n\
-allow-hotplug {iface}\n\
-iface {iface} inet dhcp\n\
-        wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf\n\
-".format(iface=iface)
-
-  hfile = open("interfaces.wifi","w")
   hfile.write(info)
   hfile.close()
 
