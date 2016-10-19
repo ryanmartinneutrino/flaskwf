@@ -8,7 +8,6 @@ app = Flask(__name__)
 @app.route('/', methods = ['POST', 'GET'])
 def wifilist():
 
-  conn_info = wf.get_connection_info('wlan0')
   aps=[] #list of APs if scan was called
 
   message = '' 
@@ -26,8 +25,7 @@ def wifilist():
       pwd=request.form['appwd']
       ssid=request.form['apssid']
       ip=request.form['apip']      
-      wf.write_hostapd_conf('wlan0', ssid, pwd, ip)
-      wf.write_network_interfaces_AP(ip, iface='wlan0' )
+      wf.start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wlan0')
       message = 'wrote hostapd.conf and interfaces'
 
     if 'scan' in request.form:    
@@ -36,6 +34,9 @@ def wifilist():
 
   else:
     aps = wf.get_aps('wlan0') 
+
+  conn_info = wf.get_connection_info('wlan0')
+
   return render_template("wifilist.html",aps = aps,
                          conn_info = conn_info,
                          message=message,

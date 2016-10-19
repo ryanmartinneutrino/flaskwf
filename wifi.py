@@ -8,10 +8,10 @@ def connect_wifi(ssid, pwd, iface='wlan0'):
   write_wpa_conf(ssid, pwd)
   write_network_interfaces_WF(iface)
   sp.call('sudo cp /etc/network/interfaces /etc/network/interfaces.bak',shell=True)  
-  sp.call('sudo cp interfaces.wifi /etc/network/interfaces',shell=True)  
   sp.call('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.bak', shell=True)
   sp.call('sudo cp wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf',shell=True)
   sp.call('sudo ifdown '+iface, shell=True)
+  sp.call('sudo cp interfaces.wifi /etc/network/interfaces',shell=True)  
   sp.call('sudo ifup '+iface, shell=True)
 
 
@@ -19,11 +19,11 @@ def start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wl
 
   write_hostapd_conf(iface, ssid, pwd, ip)
   write_network_interfaces_AP(ip, iface)
-  write_dchpd_conf(network='10.10.0.0', ip=ip)
+  write_dhcpd_conf(network='10.10.0.0', ip=ip)
   sp.call('sudo cp hostapd.conf /etc/hostapd/hostapd.conf',shell=True)  
-  sp.call('sudo cp interfaces.ap /etc/network/interfaces',shell=True)  
   sp.call('sudo cp dhcpd.conf /etc/dhcp/dhcpd.conf',shell=True)  
   sp.call('sudo ifdown '+iface, shell=True)
+  sp.call('sudo cp interfaces.ap /etc/network/interfaces',shell=True)  
   sp.call('sudo ifup '+iface, shell=True)
 
   sp.call('sudo service hostapd restart', shell=True)
@@ -33,7 +33,12 @@ def start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wl
 def write_wpa_conf(ssid, pwd):
   '''Write the wpa_supplicant file'''
   wfile = open ("wpa_supplicant.conf", "w")
-  info = "network={\n ssid=\"" + ssid + "\"\n psk=\"" + pwd + "\"\n}"
+  info ="\
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n\
+update_config=1\n\
+country=GB\n\
+"
+  info = "network={\n ssid=\"" + ssid + "\"\n psk=\"" + pwd + "\"\n key_mgmt=WPA-PSK\n  }"
   wfile.write(info)
   wfile.close()
 
@@ -65,7 +70,7 @@ auto lo\n\
 iface lo inet loopback \n\
 iface eth0 inet dhcp\n\
 \n\
-auto {iface}\n\
+#auto {iface}\n\
 allow-hotplug {iface}\n\
 iface {iface} inet dhcp\n\
         wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf\n\
