@@ -36,6 +36,10 @@ def wifilist():
     aps = wf.get_aps('wlan0') 
 
   conn_info = wf.get_connection_info('wlan0')
+  if 'ip' not in conn_info or conn_info['ip'].find('.') <0:
+    wf.start_ap(ssid = 'flaskwf', pwd = '123flaskwf', ip = '10.10.0.1', iface='wlan0')
+    conn_info = wf.get_connection_info('wlan0')
+
 
   return render_template("wifilist.html",aps = aps,
                          conn_info = conn_info,

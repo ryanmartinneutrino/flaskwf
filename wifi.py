@@ -20,76 +20,26 @@ def connect_wifi(ssid, pwd, iface='wlan0'):
 
 def start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wlan0'):
 
-  write_hostapd_conf(iface, ssid, pwd, ip)
-  write_network_interfaces_AP(ip, iface)
-  write_dhcpd_conf(network='10.10.0.0', ip=ip)
-  sp.call('sudo cp hostapd.conf /etc/hostapd/hostapd.conf',shell=True)  
+  tp.fill_template(file='hostapd.conf', values={'iface':iface,'ssid':ssid, 'pwd':pwd, 'ip':ip})
+  tp.fill_template(file='interfaces.ap', values={'iface':iface, 'ip':ip})
+  tp.fill_template(file='dhcpd.conf', values={'network':'10.10.0.0'})
+
+  #sp.call('sudo cp hostapd.conf /etc/hostapd/hostapd.conf',shell=True)  
   sp.call('sudo cp dhcpd.conf /etc/dhcp/dhcpd.conf',shell=True)  
   sp.call('sudo ifdown '+iface, shell=True)
   sp.call('sudo cp interfaces.ap /etc/network/interfaces',shell=True)  
   sp.call('sudo ifup '+iface, shell=True)
 
-  sp.call('sudo service hostapd restart', shell=True)
-  #sp.call('sudo  ', shell=True)
 
+  sp.call('sudo service isc-dhcp-server restart ', shell=True)
+  #sp.call('sudo service hostapd restart', shell=True)
+  sp.call('sudo ../hostapd hostapd.conf', shell=True)
 
+def ifup(iface='wlan0'):
+  sp.call('sudo ifup '+iface, shell=True)
 
-def write_hostapd_conf(iface, ssid, pwd, ip):
-  '''Create the hostapd.conf file'''
-
-  info = "\
-interface={} \n\
-ssid={} \n\
-driver=rtl871xdrv \n\
-wpa_passphrase={}\n\
-hw_mode=g\n\
-channel=10\n\
-auth_algs=1\n\
-wpa=2\n\
-wpa_key_mgmt=WPA-PSK\n\
-wpa_pairwise=CCMP\n\
-rsn_pairwise=CCMP\n\
-".format(iface,ssid, pwd)
-  
-  hfile = open("hostapd.conf", "w")
-  hfile.write(info)
-  hfile.close()
-
-def write_network_interfaces_AP(ip = '10.10.0.1', iface='wlan0' ):
-  '''Write the /etc/network/interfaces file for AP mode'''
-  network = '10.10.0.0'
-  info = "\
-auto lo\n\
-iface lo inet loopback\n\
-iface eth0 inet dhcp\n\
-\n\
-#auto {iface}\n\
-allow-hotplug {iface}\n\
-iface {iface} inet static\n\
-	address {ip}\n\
-	netmask 255.255.255.0\n\
-".format(iface=iface, ip=ip)
-
-  hfile = open("interfaces.ap", "w")
-  hfile.write(info)
-  hfile.close()
-
-def write_dhcpd_conf(network='10.10.0.0', ip = '10.10.0.1'):
-  info = "\
-ddns-update-style none;\n\
-default-lease-time 84600;\n\
-max-lease-time 84600;\n\
-subnet {network} netmask 255.255.255.0 {{\n\
-  range 10.10.0.2 10.10.0.100  ;\n\
-  option domain-name-servers 8.8.8.8 ;\n\
-  option routers  {ip} ;\n\
-}}\n\
-".format(network=network, ip=ip)
-  file = open("dhcpd.conf", "w")
-  file.write(info)
-  file.close()
-
-
+def ifdown(iface='wlan0'):
+  sp.call('sudo ifdown '+iface, shell=True)
 
 def get_aps2(iface="wlan0"):
   '''return a list of dictionnaries with access point info from iw'''
