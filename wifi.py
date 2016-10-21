@@ -18,7 +18,7 @@ def connect_wifi(ssid, pwd, iface='wlan0'):
   sp.call('sudo ifup '+iface, shell=True)
 
 
-def start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wlan0'):
+def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', ip = '10.10.0.1', iface='wlan0'):
 
   tp.fill_template(file='hostapd.conf', values={'iface':iface,'ssid':ssid, 'pwd':pwd, 'ip':ip})
   tp.fill_template(file='interfaces.ap', values={'iface':iface, 'ip':ip})
@@ -33,7 +33,9 @@ def start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wl
 
   sp.call('sudo service isc-dhcp-server restart ', shell=True)
   #sp.call('sudo service hostapd restart', shell=True)
-  sp.call('sudo ../hostapd hostapd.conf', shell=True)
+  #sp.call('sudo hostapd hostapd.conf', shell=True)
+  return sp.Popen('sudo hostapd hostapd.conf', shell=True)
+
 
 def ifup(iface='wlan0'):
   sp.call('sudo ifup '+iface, shell=True)

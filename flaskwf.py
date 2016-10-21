@@ -3,11 +3,12 @@ import wifi as wf
 
 app = Flask(__name__)
 
-
+hostapd_proc = ''
 
 @app.route('/', methods = ['POST', 'GET'])
 def wifilist():
 
+  global hostapd_proc
   aps=[] #list of APs if scan was called
 
   message = '' 
@@ -18,6 +19,10 @@ def wifilist():
       #connect to a wifi
       pwd=request.form['pwd']
       ssid=request.form['ssid']
+
+      if hostapd_proc != '':
+	hostapd_proc.kill()
+        hostapd_proc = ''
       wf.connect_wifi(ssid, pwd)
       message = 'wrote wpa_supplicant.conf'
 
@@ -25,7 +30,7 @@ def wifilist():
       pwd=request.form['appwd']
       ssid=request.form['apssid']
       ip=request.form['apip']      
-      wf.start_ap(ssid = 'flaskwf', pwd = '1257Berkeley', ip = '10.10.0.1', iface='wlan0')
+      hostapd_proc = wf.start_ap(ssid = ssid, pwd = pwd, ip = ip, iface='wlan0')
       message = 'wrote hostapd.conf and interfaces'
 
     if 'scan' in request.form:    
@@ -37,7 +42,7 @@ def wifilist():
 
   conn_info = wf.get_connection_info('wlan0')
   if 'ip' not in conn_info or conn_info['ip'].find('.') <0:
-    wf.start_ap(ssid = 'flaskwf', pwd = '123flaskwf', ip = '10.10.0.1', iface='wlan0')
+    hostapd_proc = wf.start_ap(ssid = ssid, pwd = pwd, ip = ip, iface='wlan0')
     conn_info = wf.get_connection_info('wlan0')
 
 
