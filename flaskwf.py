@@ -29,8 +29,8 @@ def wifilist():
     if 'ap' in request.form: 
       pwd=request.form['appwd']
       ssid=request.form['apssid']
-      ip=request.form['apip']      
-      hostapd_proc = wf.start_ap(ssid = ssid, pwd = pwd, ip = ip, iface='wlan0')
+      subnet=request.form['apsubnet']      
+      hostapd_proc = wf.start_ap(ssid = ssid, pwd = pwd, subnet = subnet, iface='wlan0')
       message = 'wrote hostapd.conf and interfaces'
 
     if 'scan' in request.form:    

@@ -7,6 +7,8 @@ import templater as tp
 
 
 def connect_wifi(ssid, pwd, iface='wlan0'):
+  '''Connect the given interface to an AP'''
+
   tp.fill_template(file='wpa_supplicant.conf', values={'ssid':ssid, 'pwd':pwd})
   tp.fill_template(file='interfaces.wifi', values={'iface':iface})
   
@@ -18,24 +20,38 @@ def connect_wifi(ssid, pwd, iface='wlan0'):
   sp.call('sudo ifup '+iface, shell=True)
 
 
-def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', ip = '10.10.0.1', iface='wlan0'):
+def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='wlan0'):
+  ''' Start an AP based on the passed parameters '''  
 
-  tp.fill_template(file='hostapd.conf', values={'iface':iface,'ssid':ssid, 'pwd':pwd, 'ip':ip})
-  tp.fill_template(file='interfaces.ap', values={'iface':iface, 'ip':ip})
-  tp.fill_template(file='dhcpd.conf', values={'network':'10.10.0.0'})
+  #Determine the network configuration based on the subnet (router is *.*.*.1)
+  subnets = subnet.split('.')
+  network = subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.0' 
+  rangeMin= subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.2' 
+  rangeMax = subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.10'
+  routerIP = subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.1'
+ 
+  #Generate the config files from templates
+  tp.fill_template(file='hostapd.conf', values={'iface':iface,'ssid':ssid, 'pwd':pwd, 'ip':routerIP})
+  tp.fill_template(file='interfaces.ap', values={'iface':iface, 'ip':routerIP})
+  tp.fill_template(file='dhcpd.conf', values={'network':network, 'rangeMin':rangeMin,
+                                              'rangeMax': rangeMax, 'routerIP': routerIP})
 
-  #sp.call('sudo cp hostapd.conf /etc/hostapd/hostapd.conf',shell=True)  
-  sp.call('sudo cp dhcpd.conf /etc/dhcp/dhcpd.conf',shell=True)  
+  #Rewrite the network interface file
   sp.call('sudo ifdown '+iface, shell=True)
   sp.call('sudo cp interfaces.ap /etc/network/interfaces',shell=True)  
   sp.call('sudo ifup '+iface, shell=True)
 
+  #Rewrite the DHCP configuration file
+  sp.call('sudo service isc-dhcp-server stop', shell=True)
+  sp.call('sudo cp dhcpd.conf /etc/dhcp/dhcpd.conf',shell=True)  
+  sp.call('sudo service isc-dhcp-server start ', shell=True)
 
-  sp.call('sudo service isc-dhcp-server restart ', shell=True)
-  #sp.call('sudo service hostapd restart', shell=True)
-  #sp.call('sudo hostapd hostapd.conf', shell=True)
-  return sp.Popen('sudo hostapd hostapd.conf', shell=True)
+  #start the access point (kill it if already running)
+  
+  sp.call('sudo killall hostapd', shell=True)
+  hostapd_proc = sp.Popen('sudo hostapd hostapd.conf', shell=True)
 
+  return hostapd_proc
 
 def ifup(iface='wlan0'):
   sp.call('sudo ifup '+iface, shell=True)
