@@ -6,6 +6,22 @@
    MAC Addr: {{ conn_info['mac']}} <br>
    IP Addr: {{ conn_info['ip']}} <br>
    <br>
+   <h1> VPN Info </h1> 
+   {% if 'ip' in vpn_info %}
+   VPN IP Addr: {{ vpn_info['ip']}} <br>
+     <form action = "{{ url_root }}" method = "POST">
+       <input type = "hidden" name = "disconnect_vpn" value= "True">
+       <input type = "submit" value = Disonnect VPN!" />
+     </form>
+   {% else %}
+   VPN NOT CONNECTED <br>
+     <form action = "{{ url_root }}" method = "POST">
+       <input type = "hidden" name = "connect_vpn" value= "True">
+       <input type = "submit" value = "Connect VPN!" />
+     </form>
+    
+   {% endif %} 
+   <br>
    <h1>Choose a wifi network to connect to:</h1>
    <form action  = "{{ url_root }}" method = "POST">
       <input type = "hidden" name = "scan" value= "True">

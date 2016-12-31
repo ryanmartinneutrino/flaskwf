@@ -4,6 +4,19 @@ import subprocess as sp
 import re
 import os
 import templater as tp
+import time
+
+
+def connect_vpn():
+  sp.call('./startvpn.sh', shell=True)
+  time.sleep(10)
+  sp.call('iptablesVPN2WLAN.sh', shell=True)
+  
+
+def disconnect_vpn():
+  sp.call('./stopvpn.sh', shell = True)
+  sp.call('sudo iptables -F', shell = True)
+  time.sleep(5)
 
 
 def connect_wifi(ssid, pwd, iface='wlan0'):

@@ -33,6 +33,14 @@ def wifilist():
       hostapd_proc = wf.start_ap(ssid = ssid, pwd = pwd, subnet = subnet, iface='wlan0')
       message = 'wrote hostapd.conf and interfaces'
 
+    
+    if 'connect_vpn' in request.form:  
+      wf.connect_vpn()
+
+    if 'disconnect_vpn' in request.form:
+      wf.disconnect_vpn()
+  
+
     if 'scan' in request.form:    
       aps = wf.get_aps2('wlan0')
       message = 'done scanning'
@@ -41,6 +49,8 @@ def wifilist():
     aps = wf.get_aps('wlan0') 
 
   conn_info = wf.get_connection_info('wlan0')
+  vpn_info = wf.get_connection_info('tun0')
+
   if 'ip' not in conn_info or conn_info['ip'].find('.') <0:
     hostapd_proc = wf.start_ap(ssid = ssid, pwd = pwd, ip = ip, iface='wlan0')
     conn_info = wf.get_connection_info('wlan0')
@@ -48,6 +58,7 @@ def wifilist():
 
   return render_template("wifilist.html",aps = aps,
                          conn_info = conn_info,
+                         vpn_info = vpn_info,
                          message=message,
                          url_root=request.url_root)
 
