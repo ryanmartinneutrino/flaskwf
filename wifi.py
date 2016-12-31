@@ -10,7 +10,7 @@ import time
 def connect_vpn():
   sp.call('./startvpn.sh', shell=True)
   time.sleep(10)
-  sp.call('iptablesVPN2WLAN.sh', shell=True)
+  sp.call('./iptablesVPN2WLAN.sh', shell=True)
   
 
 def disconnect_vpn():
