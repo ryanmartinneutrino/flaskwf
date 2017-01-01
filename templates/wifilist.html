@@ -8,10 +8,11 @@
    <br>
    <h1> VPN Info </h1> 
    {% if 'ip' in vpn_info %}
+   VPN Config: {{ vpn_info['lastvpn'] }}<br>
    VPN IP Addr: {{ vpn_info['ip']}} <br>
      <form action = "{{ url_root }}" method = "POST">
        <input type = "hidden" name = "disconnect_vpn" value= "True">
-       <input type = "submit" value = Disonnect VPN!" />
+       <input type = "submit" value = Disconnect VPN!" />
      </form>
    {% else %}
      <form action = "{{ url_root }}" method = "POST">

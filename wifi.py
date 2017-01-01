@@ -10,15 +10,19 @@ import glob
 def connect_vpn(conf):
 #  sp.call('./startvpn.sh', shell=True)
   sp.Popen('sudo openvpn --config '+conf+ '&', shell=True)
-  time.sleep(10)
+  file = open('lastvpn', 'w')
+  file.write(conf)
+  file.close()
+  time.sleep(12)
   sp.call('./iptablesVPN2WLAN.sh', shell=True)
   
 
 def disconnect_vpn():
   #sp.call('./stopvpn.sh', shell = True)
   sp.call('sudo killall openvpn', shell = True)
-  sp.call('sudo iptables -F', shell = True)
-  time.sleep(5)
+  #sp.call('sudo iptables -F', shell = True)
+  sp.call('./iptablesETH2WLAN.sh', shell=True)
+  time.sleep(10)
 
 
 def get_pid(process_name):

@@ -49,6 +49,10 @@ def wifilist():
 
   conn_info = wf.get_connection_info('wlan0')
   vpn_info = wf.get_connection_info('tun0')
+  vfile = open('lastvpn')
+  lastvpn=vfile.readline()
+  vfile.close()
+  vpn_info['lastvpn']=lastvpn
   vpn_confs = wf.get_vpn_configs()
   hostapd_info = wf.get_ap_info()
 
