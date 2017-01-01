@@ -5,23 +5,43 @@ import re
 import os
 import templater as tp
 import time
+import glob
 
-
-def connect_vpn():
-  sp.call('./startvpn.sh', shell=True)
+def connect_vpn(conf):
+#  sp.call('./startvpn.sh', shell=True)
+  sp.Popen('sudo openvpn --config '+conf+ '&', shell=True)
   time.sleep(10)
   sp.call('./iptablesVPN2WLAN.sh', shell=True)
   
 
 def disconnect_vpn():
-  sp.call('./stopvpn.sh', shell = True)
+  #sp.call('./stopvpn.sh', shell = True)
+  sp.call('sudo killall openvpn', shell = True)
   sp.call('sudo iptables -F', shell = True)
   time.sleep(5)
 
 
+def get_pid(process_name):
+  proc = sp.Popen(['pidof '+process_name], shell=True, stdout = sp.PIPE )
+  pid=[]
+  for line in iter(proc.stdout.readline,''):
+    pid = line.rstrip().split()
+  return pid  
+
+def stop_ap():
+  '''Stop hostapd if it's running'''
+  pid = get_pid('hostapd')
+  if len(pid) > 0:
+    print "killing AP"
+    sp.call('sudo killall hostapd', shell=True)
+    time.sleep(5)
+
 def connect_wifi(ssid, pwd, iface='wlan0'):
   '''Connect the given interface to an AP'''
 
+  #kill AP if running:
+  stop_ap()
+  #fill templates:
   tp.fill_template(file='wpa_supplicant.conf', values={'ssid':ssid, 'pwd':pwd})
   tp.fill_template(file='interfaces.wifi', values={'iface':iface})
   
@@ -60,11 +80,10 @@ def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='
   sp.call('sudo service isc-dhcp-server start ', shell=True)
 
   #start the access point (kill it if already running)
-  
-  sp.call('sudo killall hostapd', shell=True)
-  hostapd_proc = sp.Popen('sudo hostapd hostapd.conf', shell=True)
 
-  return hostapd_proc
+  stop_ap()
+  sp.Popen('sudo hostapd hostapd.conf &', shell=True)
+  time.sleep(10)
 
 def ifup(iface='wlan0'):
   sp.call('sudo ifup '+iface, shell=True)
@@ -155,7 +174,21 @@ def get_connection_info(iface = 'wlan0'):
 
   return info
 
+def get_ap_info(): 
+  info = {}
+  pid = get_pid('hostapd')
+  if len(pid) > 0:
+    info['pid'] = pid[0]
+    hfile = open('hostapd.conf')
+    for line in hfile:
+      line = line.rstrip()
+      if line.find('ssid') > -1 and 'ssid' not in info:
+        info['ssid']=line.split('=')[1]
+      if line.find('wpa_passphrase') > -1:
+        info['pwd']=line.split('=')[1]  
 
+  return info
 
-
-
+def get_vpn_configs():
+  files = glob.glob('vpns/*.ovpn') 
+  return files

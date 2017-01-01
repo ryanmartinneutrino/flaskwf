@@ -14,9 +14,13 @@
        <input type = "submit" value = Disonnect VPN!" />
      </form>
    {% else %}
-   VPN NOT CONNECTED <br>
      <form action = "{{ url_root }}" method = "POST">
        <input type = "hidden" name = "connect_vpn" value= "True">
+       <select name='vpn_config'>
+       {% for conf in vpn_confs %}
+       <option value={{ conf }}> {{ conf }} </option>
+       {% endfor %}
+       </select> <br>
        <input type = "submit" value = "Connect VPN!" />
      </form>
     
@@ -49,14 +53,28 @@
       </table>
    <br>
 
-   <h1> Run as access point </h1>
+   <h1> AP INFO </h1>
+   {% if 'pid' in hostapd_info %}
+
+   AP running with ssid: {{ hostapd_info['ssid'] }} <br>
+   AP running with password: {{ hostapd_info['pwd'] }} <br>
+   <form action = "{{ url_root }}" method = "POST">
+       <input type = "hidden" name = "stop_ap" value= "True">
+       <input type = "submit" value = "Stop AP" />
+   </form>
+  
+   {% else %}
+
      <form action = "{{ url_root }}" method = "POST">
-       <input type = "hidden" name = "ap" value= "True">
+       <input type = "hidden" name = "start_ap" value= "True">
        Network Name: <input type = "text" name = "apssid" value = "flaskwf"><br>
        Password: <input type = "text" name = "appwd" value="123flaskwf"><br>
        Subnet: <input type = "text" name = "apsubnet" value = "10.10.0.0"><br>
        <input type = "submit" value = "Run as AP" />
      </form>
+
+   {% endif %}
+
 
 <h1> Messages</h1>
 {{ message }}   
