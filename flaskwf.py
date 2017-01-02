@@ -9,7 +9,6 @@ app = Flask(__name__)
 @app.route('/', methods = ['POST', 'GET'])
 def wifilist():
 
-  #global hostapd_proc
   aps=[] #list of APs if scan was called
 
   message = '' 
@@ -32,12 +31,15 @@ def wifilist():
  
     if 'stop_ap' in request.form: 
       wf.stop_ap()   
+      message = 'stopped AP'
 
     if 'connect_vpn' in request.form:  
       wf.connect_vpn(request.form['vpn_config'])
+      message = "connected VPN"
 
     if 'disconnect_vpn' in request.form:
       wf.disconnect_vpn()
+      message = "disconnected VPN"
 
     if 'scan' in request.form:    
       aps = wf.get_aps2('wlan0')
@@ -46,24 +48,25 @@ def wifilist():
   else:
     aps = wf.get_aps('wlan0') 
 
-
-  conn_info = wf.get_connection_info('wlan0')
-  vpn_info = wf.get_connection_info('tun0')
-  vfile = open('lastvpn')
-  lastvpn=vfile.readline()
-  vfile.close()
-  vpn_info['lastvpn']=lastvpn
+  iface_info = wf.get_interface_info()
+  external_ip = wf.get_external_ip()
+  if 'tun0' in iface_info:
+    vfile = open('lastvpn')
+    lastvpn=vfile.readline()
+    vfile.close()
+    iface_info['tun0']['lastvpn']=lastvpn
   vpn_confs = wf.get_vpn_configs()
   hostapd_info = wf.get_ap_info()
 
-  if 'ip' not in conn_info or conn_info['ip'].find('.') <0:
-    hostapd_proc = wf.start_ap(ssid = ssid, pwd = pwd, ip = ip, iface='wlan0')
-    conn_info = wf.get_connection_info('wlan0')
+  #Start AP if no wifi (untested!!!) 
+  if 'ip' not in iface_info['wlan0']  or iface_info['wlan0']['ip'].find('.') <0:
+    wf.start_ap(ssid = 'flaskwf', pwd = '123flask', ip = '10.10.0.0', iface='wlan0')
+    iface_info['wlan0'] = wf.get_connection_info('wlan0')
 
 
   return render_template("wifilist.html",aps = aps,
-                         conn_info = conn_info,
-                         vpn_info = vpn_info,
+                         iface_info = iface_info,
+                         external_ip = external_ip,
                          vpn_confs = vpn_confs,
                          hostapd_info = hostapd_info,
                          message=message,

@@ -1,15 +1,21 @@
 <!doctype html>
 <html>
    <body>
+
    <h1> Interface info</h1>
-   Interface: {{ conn_info['iface']}} <br>
-   MAC Addr: {{ conn_info['mac']}} <br>
-   IP Addr: {{ conn_info['ip']}} <br>
+   {% for iface, info in iface_info.iteritems() %} 
+   Interface: {{ iface }} <br>
+   MAC Addr: {{ info['mac']}} <br>
+   IP Addr: {{ info['ip']}} <br>
    <br>
+   {% endfor %}
+   External IP : {{ external_ip }}
+   <br><br>
+
    <h1> VPN Info </h1> 
-   {% if 'ip' in vpn_info %}
-   VPN Config: {{ vpn_info['lastvpn'] }}<br>
-   VPN IP Addr: {{ vpn_info['ip']}} <br>
+   {% if 'tun0' in iface_info %}
+   VPN Config: {{ iface_info['tun0']['lastvpn'] }}<br>
+   VPN IP Addr: {{ iface_info['tun0']['ip']}} <br>
      <form action = "{{ url_root }}" method = "POST">
        <input type = "hidden" name = "disconnect_vpn" value= "True">
        <input type = "submit" value = Disconnect VPN!" />
@@ -23,10 +29,10 @@
        {% endfor %}
        </select> <br>
        <input type = "submit" value = "Connect VPN!" />
-     </form>
-    
+     </form>    
    {% endif %} 
    <br>
+
    <h1>Choose a wifi network to connect to:</h1>
    <form action  = "{{ url_root }}" method = "POST">
       <input type = "hidden" name = "scan" value= "True">

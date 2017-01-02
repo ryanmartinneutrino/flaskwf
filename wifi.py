@@ -36,7 +36,6 @@ def stop_ap():
   '''Stop hostapd if it's running'''
   pid = get_pid('hostapd')
   if len(pid) > 0:
-    print "killing AP"
     sp.call('sudo killall hostapd', shell=True)
     time.sleep(5)
 
@@ -158,6 +157,26 @@ def get_aps(iface="wlan0"):
 
   return aps
 
+def get_interface_info():
+  '''return a dictionnary with information on network interfaces'''
+  interfaces = get_interface_list()
+  info = {}
+  for iface in interfaces:
+    info[iface]=get_connection_info(iface)
+  return info
+
+
+def get_interface_list():
+  '''return a list of network interfaces'''
+  proc = sp.Popen("ip link show", stdout = sp.PIPE, shell=True)
+  interfaces = []
+  for line in iter(proc.stdout.readline,''):
+    rline = line.rstrip()
+    if rline.find('link/')>-1:
+      continue
+    interfaces.append( rline.split(':')[1].strip() )
+  return interfaces 
+
 def get_connection_info(iface = 'wlan0'):
   '''return ip and MAC addresses of interface from ifconfig '''
   proc = sp.Popen(["ifconfig", iface ], stdout = sp.PIPE)
@@ -177,6 +196,14 @@ def get_connection_info(iface = 'wlan0'):
    
 
   return info
+
+def get_external_ip():
+  '''get external ip address'''
+  proc = sp.Popen("curl ipinfo.io/ip", stdout = sp.PIPE, shell=True)
+  ip=''
+  for line in iter(proc.stdout.readline,''):
+    ip = line.rstrip()
+  return ip
 
 def get_ap_info(): 
   info = {}
