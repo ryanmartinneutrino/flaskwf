@@ -2,17 +2,20 @@
 <html>
    <body>
 
-   <h1> Interface info</h1>
-   {% for iface, info in iface_info.iteritems() %} 
-   Interface: {{ iface }} <br>
-   MAC Addr: {{ info['mac']}} <br>
-   IP Addr: {{ info['ip']}} <br>
-   <br>
+{% block interface_info %} {% endblock %}
+
+ <h1> Interface info</h1>
+   {% for iface, info in iface_info.iteritems() %}
+     Interface: {{ iface }} <br>
+     MAC Addr: {{ info['mac']}} <br>
+     IP Addr: {{ info['ip']}} <br>
+     <br>
    {% endfor %}
    External IP : {{ external_ip }}
+
    <br><br>
 
-   <h1> VPN Info </h1> 
+ <h1> VPN Info </h1> 
    {% if 'tun0' in iface_info %}
    VPN Config: {{ iface_info['tun0']['lastvpn'] }}<br>
    VPN IP Addr: {{ iface_info['tun0']['ip']}} <br>
