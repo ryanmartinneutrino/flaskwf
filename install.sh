@@ -1,6 +1,10 @@
 #! /bin/bash
 
-#sudo apt-get update
+sudo apt-get update
+
+sudo apt-get install python-pip openvpn
+sudo pip install Flask
+
 sudo apt-get install -y  iw hostapd isc-dhcp-server openvpn
 
 

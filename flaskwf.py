@@ -10,6 +10,7 @@ app = Flask(__name__)
 def wifilist():
 
   aps=[] #list of APs if scan was called
+  interfaces = wf.get_interface_list()
 
   message = '' 
 
@@ -46,7 +47,10 @@ def wifilist():
       message = 'done scanning'
 
   else:
-    aps = wf.get_aps('wlan0') 
+    if 'wlan0' in interfaces:
+      aps = wf.get_aps('wlan0') 
+    else:
+      aps = []
 
   iface_info = wf.get_interface_info()
   external_ip = wf.get_external_ip()
@@ -58,10 +62,11 @@ def wifilist():
   vpn_confs = wf.get_vpn_configs()
   hostapd_info = wf.get_ap_info()
 
-  #Start AP if no wifi (untested!!!) 
-  if 'ip' not in iface_info['wlan0']  or iface_info['wlan0']['ip'].find('.') <0:
-    wf.start_ap(ssid = 'flaskwf', pwd = '123flask', ip = '10.10.0.0', iface='wlan0')
-    iface_info['wlan0'] = wf.get_connection_info('wlan0')
+  #Start AP if no wifi (untested!!!)
+  if 'wlan0' in interfaces: 
+    if 'ip' not in iface_info['wlan0']  or iface_info['wlan0']['ip'].find('.') <0:
+      wf.start_ap(ssid = 'flaskwf', pwd = '123flask', ip = '10.10.0.0', iface='wlan0')
+      iface_info['wlan0'] = wf.get_connection_info('wlan0')
 
 
   return render_template("wifilist.html",aps = aps,
