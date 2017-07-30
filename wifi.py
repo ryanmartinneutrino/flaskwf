@@ -7,20 +7,24 @@ import templater as tp
 import time
 import glob
 
-def connect_vpn(conf):
+def connect_vpn(conf,iface='wlan0', iface_eth='eth0'):
 #  sp.call('./startvpn.sh', shell=True)
   sp.Popen('sudo openvpn --config '+conf+ '&', shell=True)
   file = open('lastvpn', 'w')
   file.write(conf)
   file.close()
   time.sleep(12)
+  tp.fill_template(file='iptablesVPN2WLAN.sh', values={'iface':iface,'iface_eth':iface_eth})
+  sp.call('chmod +x iptablesVPN2WLAN.sh', shell=True)
   sp.call('./iptablesVPN2WLAN.sh', shell=True)
   
 
-def disconnect_vpn():
+def disconnect_vpn(iface='wlan0', iface_eth='eth0'):
   #sp.call('./stopvpn.sh', shell = True)
   sp.call('sudo killall openvpn', shell = True)
   #sp.call('sudo iptables -F', shell = True)
+  tp.fill_template(file='iptablesETH2WLAN.sh', values={'iface':iface,'iface_eth':iface_eth})
+  sp.call('chmod +x iptablesETH2WLAN.sh', shell=True)
   sp.call('./iptablesETH2WLAN.sh', shell=True)
   time.sleep(10)
 

@@ -52,11 +52,11 @@ def wifilist():
       message = 'stopped AP'
 
     if 'connect_vpn' in request.form:  
-      wf.connect_vpn(request.form['vpn_config'])
+      wf.connect_vpn(request.form['vpn_config'],iface=iface_wifi, iface_eth=iface_wired)
       message = "connected VPN"
 
     if 'disconnect_vpn' in request.form:
-      wf.disconnect_vpn()
+      wf.disconnect_vpn(iface=iface_wifi, iface_eth=iface_wired)
       message = "disconnected VPN"
 
     if 'scan' in request.form:    
