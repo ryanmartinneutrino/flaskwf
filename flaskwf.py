@@ -8,14 +8,22 @@ app = Flask(__name__)
 
 @app.route('/', methods = ['POST', 'GET'])
 def wifilist():
+#The main page:
 
   aps=[] #list of APs if scan was called
   interfaces = wf.get_interface_list()
-
+  
   message = '' 
+  iface_wifi=None
+  iface_wired=None
 
   if request.method == 'POST':
 
+    if "choose_iface" in request.form:
+      iface_wifi=request.form['iface_wifi']
+      iface_wired=request.form['iface_wired']
+
+    
     if 'connect' in request.form: 
       #connect to a wifi
       pwd=request.form['pwd']
@@ -46,10 +54,11 @@ def wifilist():
       aps = wf.get_aps2('wlan0')
       message = 'done scanning'
 
-  else:
+  else: #Get request
     if 'wlan0' in interfaces:
       aps = wf.get_aps('wlan0') 
     else:
+      #return render_template('choose_iface.html',interfaces=interfaces,url_root=request.url_root)
       aps = []
 
   iface_info = wf.get_interface_info()
@@ -75,7 +84,9 @@ def wifilist():
                          vpn_confs = vpn_confs,
                          hostapd_info = hostapd_info,
                          message=message,
-                         url_root=request.url_root)
+                         url_root=request.url_root,
+                         iface_wifi=iface_wifi,
+                         iface_wired=iface_wired)
 
 
 if __name__ == '__main__':
