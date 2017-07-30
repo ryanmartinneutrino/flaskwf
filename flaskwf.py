@@ -17,25 +17,34 @@ def wifilist():
   iface_wifi=None
   iface_wired=None
 
+  #Use these by default if they exists
+  if 'wlan0' in interfaces:
+    iface_wifi = 'wlan0'
+  if 'eth0' in interfaces:
+    iface_wired = 'eth0'
+
   if request.method == 'POST':
 
     if "choose_iface" in request.form:
+      iface_wifi=request.form['new_iface_wifi']
+      iface_wired=request.form['new_iface_wired']
+
+    else:
       iface_wifi=request.form['iface_wifi']
       iface_wired=request.form['iface_wired']
-
-    
+   
     if 'connect' in request.form: 
       #connect to a wifi
       pwd=request.form['pwd']
       ssid=request.form['ssid']
-      wf.connect_wifi(ssid, pwd)
+      wf.connect_wifi(ssid, pwd, iface=iface_wifi, iface_eth=iface_wired)
       message = 'wrote wpa_supplicant.conf'
 
     if 'start_ap' in request.form: 
       pwd=request.form['appwd']
       ssid=request.form['apssid']
       subnet=request.form['apsubnet']      
-      wf.start_ap(ssid = ssid, pwd = pwd, subnet = subnet, iface='wlan0')
+      wf.start_ap(ssid = ssid, pwd = pwd, subnet = subnet, iface=iface_wifi, iface_eth=iface_wired)
       message = 'started AP, wrote hostapd.conf and interfaces'
  
     if 'stop_ap' in request.form: 
@@ -51,14 +60,13 @@ def wifilist():
       message = "disconnected VPN"
 
     if 'scan' in request.form:    
-      aps = wf.get_aps2('wlan0')
+      aps = wf.get_aps2(iface=iface_wifi)
       message = 'done scanning'
 
   else: #Get request
-    if 'wlan0' in interfaces:
-      aps = wf.get_aps('wlan0') 
+    if iface_wifi is not None:
+      aps = wf.get_aps(iface=iface_wifi) 
     else:
-      #return render_template('choose_iface.html',interfaces=interfaces,url_root=request.url_root)
       aps = []
 
   iface_info = wf.get_interface_info()
@@ -72,10 +80,10 @@ def wifilist():
   hostapd_info = wf.get_ap_info()
 
   #Start AP if no wifi (untested!!!)
-  if 'wlan0' in interfaces: 
-    if 'ip' not in iface_info['wlan0']  or iface_info['wlan0']['ip'].find('.') <0:
-      wf.start_ap(ssid = 'flaskwf', pwd = '123flask', ip = '10.10.0.0', iface='wlan0')
-      iface_info['wlan0'] = wf.get_connection_info('wlan0')
+  if iface_wifi is not None: 
+    if 'ip' not in iface_info[iface_wifi]  or iface_info[iface_wifi]['ip'].find('.') <0:
+      wf.start_ap(ssid = 'flaskwf', pwd = '123flask', ip = '10.10.0.0', iface=iface_wifi, iface_eth=iface_wired)
+      iface_info[iface_wifi] = wf.get_connection_info(iface_wifi)
 
 
   return render_template("wifilist.html",aps = aps,

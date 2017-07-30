@@ -1,6 +1,6 @@
 auto lo
 iface lo inet loopback
-iface eth0 inet dhcp
+iface {{*iface_eth*}} inet dhcp
 
 allow-hotplug {{*iface*}}
 iface {{*iface*}} inet static

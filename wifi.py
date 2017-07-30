@@ -39,14 +39,14 @@ def stop_ap():
     sp.call('sudo killall hostapd', shell=True)
     time.sleep(5)
 
-def connect_wifi(ssid, pwd, iface='wlan0'):
+def connect_wifi(ssid, pwd, iface='wlan0', iface_eth="eth0"):
   '''Connect the given interface to an AP'''
 
   #kill AP if running:
   stop_ap()
   #fill templates:
   tp.fill_template(file='wpa_supplicant.conf', values={'ssid':ssid, 'pwd':pwd})
-  tp.fill_template(file='interfaces.wifi', values={'iface':iface})
+  tp.fill_template(file='interfaces.wifi', values={'iface':iface,'iface_eth':iface_eth})
   
   sp.call('sudo cp /etc/network/interfaces /etc/network/interfaces.bak',shell=True)  
   sp.call('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.bak', shell=True)
@@ -56,7 +56,7 @@ def connect_wifi(ssid, pwd, iface='wlan0'):
   sp.call('sudo ifup '+iface, shell=True)
 
 
-def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='wlan0'):
+def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='wlan0', iface_eth='eth0'):
   ''' Start an AP based on the passed parameters '''  
 
   #Determine the network configuration based on the subnet (router is *.*.*.1)
@@ -68,7 +68,7 @@ def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='
  
   #Generate the config files from templates
   tp.fill_template(file='hostapd.conf', values={'iface':iface,'ssid':ssid, 'pwd':pwd, 'ip':routerIP})
-  tp.fill_template(file='interfaces.ap', values={'iface':iface, 'ip':routerIP})
+  tp.fill_template(file='interfaces.ap', values={'iface':iface, 'ip':routerIP, 'iface_eth':iface_eth})
   tp.fill_template(file='dhcpd.conf', values={'network':network, 'rangeMin':rangeMin,
                                               'rangeMax': rangeMax, 'routerIP': routerIP})
 
