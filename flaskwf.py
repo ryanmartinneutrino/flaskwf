@@ -12,8 +12,8 @@ def wifilist():
 
   aps=[] #list of APs if scan was called
   interfaces = wf.get_interface_list()
- 
-  message = '' 
+
+  message = ''
   iface_wifi= "unset"
   iface_wired= "unset"
 
@@ -32,8 +32,8 @@ def wifilist():
     else:
       iface_wifi=request.form['iface_wifi']
       iface_wired=request.form['iface_wired']
-   
-    if 'connect' in request.form: 
+
+    if 'connect' in request.form:
       if iface_wifi != "unset":
         #connect to a wifi
         pwd=request.form['pwd']
@@ -44,21 +44,21 @@ def wifilist():
         message = "Need wifi interface to be set to connect"
 
     if 'start_ap' in request.form:
-      if iface_wifi != "unset" : 
+      if iface_wifi != "unset" :
         pwd=request.form['appwd']
         ssid=request.form['apssid']
-        subnet=request.form['apsubnet']      
+        subnet=request.form['apsubnet']
         wf.start_ap(ssid = ssid, pwd = pwd, subnet = subnet, iface=iface_wifi, iface_eth=iface_wired)
         message = 'started AP, wrote hostapd.conf and interfaces'
       else:
-        message = "Need wifi interface to be set for AP to run" 
+        message = "Need wifi interface to be set for AP to run"
 
-    if 'stop_ap' in request.form: 
-      wf.stop_ap()   
+    if 'stop_ap' in request.form:
+      wf.stop_ap()
       message = 'stopped AP'
 
     if 'connect_vpn' in request.form:
-      if iface_wifi != "unset" and iface_wired != "unset":  
+      if iface_wifi != "unset" and iface_wired != "unset":
         wf.connect_vpn(request.form['vpn_config'],iface=iface_wifi, iface_eth=iface_wired)
         message = "connected VPN"
       else:
@@ -69,7 +69,7 @@ def wifilist():
       message = "disconnected VPN"
 
     if 'scan' in request.form:
-      if iface_wifi != "unset":    
+      if iface_wifi != "unset":
         aps = wf.get_aps2(iface=iface_wifi)
         message = 'done scanning'
       else:
@@ -77,7 +77,7 @@ def wifilist():
 
   else: #Get request
     if iface_wifi != "unset" :
-      aps = wf.get_aps(iface=iface_wifi) 
+      aps = wf.get_aps(iface=iface_wifi)
     else:
       aps = []
       message = "need wifi interface to be set for AP list"
@@ -95,9 +95,9 @@ def wifilist():
   hostapd_info = wf.get_ap_info()
 
   #Start AP if no wifi (untested!!!)
-  if iface_wifi  != "unset": 
+  if iface_wifi  != "unset":
     if 'ip' not in iface_info[iface_wifi]  or iface_info[iface_wifi]['ip'].find('.') <0:
-      wf.start_ap(ssid = 'flaskwf', pwd = '123flask', ip = '10.10.0.0', iface=iface_wifi, iface_eth=iface_wired)
+      wf.start_ap(ssid = 'flaskwf', pwd = '123flask', subnet = '10.10.0.0', iface=iface_wifi, iface_eth=iface_wired)
       iface_info[iface_wifi] = wf.get_connection_info(iface_wifi)
 
 
@@ -114,4 +114,3 @@ def wifilist():
 
 if __name__ == '__main__':
    app.run(host = '0.0.0.0', debug=True)
-

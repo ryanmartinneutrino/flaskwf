@@ -16,8 +16,9 @@ def connect_vpn(conf,iface='wlan0', iface_eth='eth0'):
   time.sleep(12)
   tp.fill_template(file='iptablesVPN2WLAN.sh', values={'iface':iface,'iface_eth':iface_eth})
   sp.call('chmod +x iptablesVPN2WLAN.sh', shell=True)
+  time.sleep(3)
   sp.call('./iptablesVPN2WLAN.sh', shell=True)
-  
+
 
 def disconnect_vpn(iface='wlan0', iface_eth='eth0'):
   #sp.call('./stopvpn.sh', shell = True)
@@ -25,6 +26,7 @@ def disconnect_vpn(iface='wlan0', iface_eth='eth0'):
   #sp.call('sudo iptables -F', shell = True)
   tp.fill_template(file='iptablesETH2WLAN.sh', values={'iface':iface,'iface_eth':iface_eth})
   sp.call('chmod +x iptablesETH2WLAN.sh', shell=True)
+  time.sleep(3)
   sp.call('./iptablesETH2WLAN.sh', shell=True)
   time.sleep(10)
 
@@ -34,7 +36,7 @@ def get_pid(process_name):
   pid=[]
   for line in iter(proc.stdout.readline,''):
     pid = line.rstrip().split()
-  return pid  
+  return pid
 
 def stop_ap():
   '''Stop hostapd if it's running'''
@@ -51,25 +53,25 @@ def connect_wifi(ssid, pwd, iface='wlan0', iface_eth="eth0"):
   #fill templates:
   tp.fill_template(file='wpa_supplicant.conf', values={'ssid':ssid, 'pwd':pwd})
   tp.fill_template(file='interfaces.wifi', values={'iface':iface,'iface_eth':iface_eth})
-  
-  sp.call('sudo cp /etc/network/interfaces /etc/network/interfaces.bak',shell=True)  
+
+  sp.call('sudo cp /etc/network/interfaces /etc/network/interfaces.bak',shell=True)
   sp.call('sudo cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.bak', shell=True)
   sp.call('sudo cp wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf',shell=True)
   sp.call('sudo ifdown '+iface, shell=True)
-  sp.call('sudo cp interfaces.wifi /etc/network/interfaces',shell=True)  
+  sp.call('sudo cp interfaces.wifi /etc/network/interfaces',shell=True)
   sp.call('sudo ifup '+iface, shell=True)
 
 
 def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='wlan0', iface_eth='eth0'):
-  ''' Start an AP based on the passed parameters '''  
+  ''' Start an AP based on the passed parameters '''
 
   #Determine the network configuration based on the subnet (router is *.*.*.1)
   subnets = subnet.split('.')
-  network = subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.0' 
-  rangeMin= subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.2' 
+  network = subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.0'
+  rangeMin= subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.2'
   rangeMax = subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.10'
   routerIP = subnets[0]+'.'+subnets[1]+'.'+subnets[2]+'.1'
- 
+
   #Generate the config files from templates
   tp.fill_template(file='hostapd.conf', values={'iface':iface,'ssid':ssid, 'pwd':pwd, 'ip':routerIP})
   tp.fill_template(file='interfaces.ap', values={'iface':iface, 'ip':routerIP, 'iface_eth':iface_eth})
@@ -78,12 +80,12 @@ def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='
 
   #Rewrite the network interface file
   sp.call('sudo ifdown '+iface, shell=True)
-  sp.call('sudo cp interfaces.ap /etc/network/interfaces',shell=True)  
+  sp.call('sudo cp interfaces.ap /etc/network/interfaces',shell=True)
   sp.call('sudo ifup '+iface, shell=True)
 
   #Rewrite the DHCP configuration file
   sp.call('sudo service isc-dhcp-server stop', shell=True)
-  sp.call('sudo cp dhcpd.conf /etc/dhcp/dhcpd.conf',shell=True)  
+  sp.call('sudo cp dhcpd.conf /etc/dhcp/dhcpd.conf',shell=True)
   sp.call('sudo service isc-dhcp-server start ', shell=True)
 
   #start the access point (kill it if already running)
@@ -149,12 +151,12 @@ def get_aps(iface="wlan0"):
         #This is not the first channel, dump info and append to aps:
         aps.append(info)
         info = {}
-      info['mac']=rline.split("Address: ")[1] 
+      info['mac']=rline.split("Address: ")[1]
 
     if rline.find("ESSID") > -1:
       id = rline.split(':')[1][1:-1]
       info['ssid'] = id
- 
+
   #add the last one to the list
   if 'mac' in info:
     aps.append(info)
@@ -179,7 +181,7 @@ def get_interface_list():
     if rline.find('link/')>-1:
       continue
     interfaces.append( rline.split(':')[1].strip() )
-  return interfaces 
+  return interfaces
 
 def get_connection_info(iface = 'wlan0'):
   '''return ip and MAC addresses of interface from ifconfig '''
@@ -191,13 +193,13 @@ def get_connection_info(iface = 'wlan0'):
 
     rline = line.rstrip()
     if rline.find("HWaddr") > -1:
-      mac = rline.split("HWaddr ")[1] 
+      mac = rline.split("HWaddr ")[1]
       info['mac'] = mac
 
     if rline.find("inet addr") > -1:
       ip = rline.split(':')[1].split(' ')[0]
       info['ip'] = ip
-   
+
 
   return info
 
@@ -209,7 +211,7 @@ def get_external_ip():
     ip = line.rstrip()
   return ip
 
-def get_ap_info(): 
+def get_ap_info():
   info = {}
   pid = get_pid('hostapd')
   if len(pid) > 0:
@@ -220,10 +222,10 @@ def get_ap_info():
       if line.find('ssid') > -1 and 'ssid' not in info:
         info['ssid']=line.split('=')[1]
       if line.find('wpa_passphrase') > -1:
-        info['pwd']=line.split('=')[1]  
+        info['pwd']=line.split('=')[1]
 
   return info
 
 def get_vpn_configs():
-  files = glob.glob('vpns/*.ovpn') 
+  files = glob.glob('vpns/*.ovpn')
   return files
