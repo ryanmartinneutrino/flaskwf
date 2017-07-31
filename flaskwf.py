@@ -12,21 +12,28 @@ def wifilist():
 
   aps=[] #list of APs if scan was called
   interfaces = wf.get_interface_list()
-
+  interfaces.append("unset")
   message = ''
   iface_wifi= "unset"
   iface_wired= "unset"
 
-  #Use these by default if they exists
-  if 'wlan0' in interfaces:
-    iface_wifi = 'wlan0'
-  if 'eth0' in interfaces:
-    iface_wired = 'eth0'
+  #Try to grab default wifi and wired interfaces:
+  for iface in interfaces:
+    if iface.startswith("wl"): #good for wlan0 and default ubuntu names
+      iface_wifi = iface
+      break
+  for iface in interfaces:
+    if iface.startswith("en") or iface.startswith("eth"):
+      iface_wired=iface
+      break
+
 
   if request.method == 'POST':
 
     if "choose_iface" in request.form:
       iface_wifi=request.form['new_iface_wifi']
+      if not iface_wifi.startswith("wl"):
+          message = "Warning, wireless interface should start with wl"
       iface_wired=request.form['new_iface_wired']
 
     else:
@@ -102,7 +109,7 @@ def wifilist():
 
 
   return render_template("wifilist.html",aps = aps,
-                         iface_info = iface_info,
+                         iface_info = iface_info, interfaces = interfaces,
                          external_ip = external_ip,
                          vpn_confs = vpn_confs,
                          hostapd_info = hostapd_info,

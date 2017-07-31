@@ -29,9 +29,9 @@
        <input type = "hidden" name = "choose_iface" value= "True">
 
        <div class='form-group'>
-         <label for="sel1">Select wireless interface:</label>
+         <label for="sel1">Select wireless interface (for AP):</label>
          <select class="form-control" name='new_iface_wifi'>
-         {% for iface, info in iface_info.iteritems() %}
+         {% for iface in interfaces %}
            {% if iface == iface_wifi %}
              <option value={{ iface }} selected="selected"> {{ iface }} </option>
            {% else %}
@@ -42,9 +42,9 @@
        </div>
 
        <div class='form-group'>
-         <label for="sel1">Select wired interface:</label>
+         <label for="sel1">Select wired interface (for VPN):</label>
          <select class="form-control" name='new_iface_wired'>
-         {% for iface, info in iface_info.iteritems() %}
+         {% for iface in interfaces %}
            {% if iface == iface_wired %}
              <option value={{ iface }} selected="selected"> {{ iface }} </option>
            {% else %}
