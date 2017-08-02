@@ -209,12 +209,16 @@ def get_interface_info():
 
 
 def get_internet_iface():
-    ''' return an interface that is connected to the internet, prefer tun if it exists'''
-    info = get_interface_info()
+    ''' return an interface that is connected to the internet, prefer tun0 if it exists'''
+    interfaces = get_interface_list()
+
+    if "tun0" in interfaces:
+        return "tun0"
+
     internet = "unset"
 
-    for iface in info.keys():
-        if iface.startswith('tun'):
+    for iface in interfaces:
+        if iface.startswith('tun'):#should be redundant
             internet = iface
             break
         if iface == 'lo':
