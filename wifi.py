@@ -74,7 +74,6 @@ def write_network_interfaces(ifile='interfaces.wifi', wifi_interface='unset', ap
 
   ofile.close()
 
-#def connect_wifi(ssid, pwd, iface='wlan0', iface_eth="eth0"):
 def connect_wifi(ssid, pwd, wifi_interface='wlan0', ap_interface='unset', ap_ip='10.10.0.1'):
   '''Connect the given interface to an AP'''
 
@@ -92,6 +91,7 @@ def connect_wifi(ssid, pwd, wifi_interface='wlan0', ap_interface='unset', ap_ip=
   time.sleep(2)
   sp.call('sudo ifup '+wifi_interface, shell=True)
   time.sleep(4)
+  set_ip_tables(iface_ap=ap_interface,iface_internet=get_internet_iface())
 
 
 
