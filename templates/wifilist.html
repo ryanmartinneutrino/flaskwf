@@ -19,47 +19,15 @@
      IP Addr: {{ info['ip']}} <br>
      <br>
    {% endfor %}
+   <br><br>
    External IP : {{ external_ip }} <br>
-   Wifi interface (to use for AP): {{ iface_wifi }} <br>
-   Wired interface (to use for VPN): {{ iface_wired }} <br>
+   Wifi interface (to use for AP): {{ iface_ap }} <br>
+   Wifi interface (to use for Wifi): {{ iface_wifi }} <br>
+   Interface to use for internet: {{ iface_internet }} <br>
+   Wired interface : {{ iface_wired }} <br>
    <br>
 
-   <div class='col-6-sm'>
-     <form action = "{{ url_root }}" method = "POST">
-       <input type = "hidden" name = "choose_iface" value= "True">
-
-       <div class='form-group'>
-         <label for="sel1">Select wireless interface (for AP):</label>
-         <select class="form-control" name='new_iface_wifi'>
-         {% for iface in interfaces %}
-           {% if iface == iface_wifi %}
-             <option value={{ iface }} selected="selected"> {{ iface }} </option>
-           {% else %}
-             <option value={{ iface }}> {{ iface }} </option>
-           {% endif %}
-         {% endfor %}
-         </select>
-       </div>
-
-       <div class='form-group'>
-         <label for="sel1">Select wired interface (for VPN):</label>
-         <select class="form-control" name='new_iface_wired'>
-         {% for iface in interfaces %}
-           {% if iface == iface_wired %}
-             <option value={{ iface }} selected="selected"> {{ iface }} </option>
-           {% else %}
-             <option value={{ iface }}> {{ iface }} </option>
-           {% endif %}
-         {% endfor %}
-         </select>
-       </div>
-
-       <input class='btn-primary' type = "submit" value = "Submit interfaces" />
-     </form>
-   </div>
-
-
-</div>
+ </div>
 </div>
 
 <div class='row'>
@@ -69,10 +37,11 @@
    VPN Config: {{ iface_info['tun0']['lastvpn'] }}<br>
    VPN IP Addr: {{ iface_info['tun0']['ip']}} <br>
      <form action = "{{ url_root }}" method = "POST">
+       <input type = "hidden" name = "iface_ap" value= "{{ iface_ap }}">
        <input type = "hidden" name = "iface_wifi" value= "{{ iface_wifi }}">
        <input type = "hidden" name = "iface_wired" value= "{{ iface_wired }}">
        <input type = "hidden" name = "disconnect_vpn" value= "True">
-       <input type = "submit" value = Disconnect VPN!" />
+       <input type = "submit" value = "Disconnect VPN!" />
      </form>
     </div>
    {% else %}
@@ -87,6 +56,7 @@
          {% endfor %}
          </select>
        </div>
+       <input type = "hidden" name = "iface_ap" value= "{{ iface_ap }}">
        <input type = "hidden" name = "iface_wifi" value= "{{ iface_wifi }}">
        <input type = "hidden" name = "iface_wired" value= "{{ iface_wired }}">
        <input class='btn-primary' type = "submit" value = "Connect VPN!" />
@@ -98,34 +68,70 @@
 <div class='row'>
    <h1>Choose a wifi network to connect to:</h1>
  <div class='col-sm-6'>
+
+
    <form action  = "{{ url_root }}" method = "POST">
+     <div class='form-group'>
+       <label for="sel1">Select wireless interface (for scanning):</label>
+       <select class="form-control" name='iface_scan'>
+       {% for iface in iface_wifi_list %}
+         {% if iface == iface_wifi %}
+           <option value={{ iface }} selected="selected"> {{ iface }} </option>
+         {% else %}
+           <option value={{ iface }}> {{ iface }} </option>
+         {% endif %}
+       {% endfor %}
+       </select>
+     </div>
       <input type = "hidden" name = "scan" value= "True">
-      <input type = "hidden" name = "iface_wifi" value= "{{ iface_wifi }}">
+      <input type = "hidden" name = "iface_ap" value= "{{ iface_ap }}">
       <input type = "hidden" name = "iface_wired" value= "{{ iface_wired }}">
+      <input type = "hidden" name = "iface_wifi" value= "{{ iface_wifi }}">
       <input class='btn-primary' type = "submit" value = "Scan" />
    <br>
    </form>
-      <table border = 1>
-         {% for ap in aps %}
 
-            <tr>
-               <th> {{ ap['ssid'] }} </th>
-               <td> {{ ap['mac']  }} </td>
-               <td> {{ ap['signal']  }} </td>
-               <td>
-                   <form action = "{{ url_root  }}" method = "POST">
-                   <input type = "hidden" name = "iface_wifi" value= "{{ iface_wifi }}">
-                   <input type = "hidden" name = "iface_wired" value= "{{ iface_wired }}">
-                   <input type = "hidden" name = "connect" value= "True">
-                   <input type = "hidden" name = "ssid" value= "{{ ap['ssid'] }}">
-                   Password: <input type = "text" name = "pwd">
-                   <input type = "submit" class='btn-primary' value = "Connect" />
-                   </form>
-               </td>
-            </tr>
+   <br>
+   <table border = 1>
+      {% for ap in aps %}
+         <tr>
+            <th> {{ ap['ssid'] }} </th>
+            <td> {{ ap['mac']  }} </td>
+            <td> {{ ap['signal']  }} </td>
+         </tr>
+      {% endfor %}
+   </table><br>
 
-         {% endfor %}
-      </table>
+   <form action  = "{{ url_root }}" method = "POST">
+     <div class='form-group'>
+       <label for="sel1">Select wireless interface (for wifi connection):</label>
+       <select class="form-control" name='new_iface_wifi'>
+       {% for iface in iface_wifi_list %}
+         {% if iface == iface_wifi %}
+           <option value={{ iface }} selected="selected"> {{ iface }} </option>
+         {% else %}
+           <option value={{ iface }}> {{ iface }} </option>
+         {% endif %}
+       {% endfor %}
+       </select>
+     </div>
+
+     <div class='form-group'>
+       <label for="sel1">Select Network:</label>
+       <select class="form-control" name='ssid'>
+       {% for ap in aps %}
+            <option value={{ ap['ssid'] }} selected="selected"> {{ ap['ssid'] }} </option>
+       {% endfor %}
+       </select>
+     </div>
+      Password: <input type = "text" name = "pwd">
+      <input type = "submit" class='btn-primary' value = "Connect" />
+      <input type = "hidden" name = "iface_ap" value= "{{ iface_ap }}">
+      <input type = "hidden" name = "iface_wired" value= "{{ iface_wired }}">
+      <input type = "hidden" name = "connect" value= "True">
+   </form>
+
+
    </div>
    </div>
 
@@ -136,6 +142,7 @@
    AP running with ssid: {{ hostapd_info['ssid'] }} <br>
    AP running with password: {{ hostapd_info['pwd'] }} <br>
    <form action = "{{ url_root }}" method = "POST">
+       <input type = "hidden" name = "iface_ap" value= "{{ iface_ap }}">
        <input type = "hidden" name = "iface_wifi" value= "{{ iface_wifi }}">
        <input type = "hidden" name = "iface_wired" value= "{{ iface_wired }}">
        <input type = "hidden" name = "stop_ap" value= "True">
@@ -148,6 +155,20 @@
        <input type = "hidden" name = "iface_wifi" value= "{{ iface_wifi }}">
        <input type = "hidden" name = "iface_wired" value= "{{ iface_wired }}">
        <input type = "hidden" name = "start_ap" value= "True">
+
+       <div class='form-group'>
+         <label for="sel1">Select wireless interface (for AP):</label>
+         <select class="form-control" name='new_iface_ap'>
+         {% for iface in iface_wifi_list %}
+           {% if iface == iface_ap %}
+             <option value={{ iface }} selected="selected"> {{ iface }} </option>
+           {% else %}
+             <option value={{ iface }}> {{ iface }} </option>
+           {% endif %}
+         {% endfor %}
+         </select>
+       </div>
+
        <div class='form-group'>
          <label for='apssid'>Network Name:</label>
          <input class='form-control' id='apssid' type = "text" name = "apssid" value = "flaskwf">
