@@ -16,22 +16,22 @@ def wifilist():
   iface_wifi= "unset"
   iface_ap = "unset"
   iface_wired= "unset"
+  iface_scan= "unset"
   iface_internet = wf.get_internet_iface()
 
   iface_wifi_list = wf.get_wifi_interfaces()
-  iface_wifi_list.append("unset")
   iface_wired_list = wf.get_wired_interfaces()
-  iface_wired_list.append("unset")
   nwifi = len(iface_wifi_list)
 
-  #wf.write_network_interfaces()
 
   #Guess interfaces to use
   if nwifi>0:
     iface_ap=iface_wifi_list[0]
-    iface_wifi=iface_wifi_list[0]
+    iface_wifi=iface_ap
+    iface_scan=iface_wifi
   if nwifi>1:
     iface_wifi=iface_wifi_list[1]
+    iface_scan=iface_wifi
   if len(iface_wired_list)>0:
     iface_wired=iface_wired_list[0]
 
@@ -41,6 +41,7 @@ def wifilist():
       iface_ap = request.form['iface_ap']
       iface_wired=request.form['iface_wired']
       iface_wifi=request.form['new_iface_wifi']
+      iface_scan=iface_wifi
 
       if iface_wifi != "unset":
         #connect to a wifi
@@ -60,6 +61,7 @@ def wifilist():
       iface_wifi=request.form['iface_wifi']
       iface_wired=request.form['iface_wired']
       iface_ap=request.form['new_iface_ap']
+      iface_scan=iface_wifi
 
       if iface_ap != "unset" :
         pwd=request.form['appwd']
@@ -77,6 +79,7 @@ def wifilist():
       iface_wifi=request.form['iface_wifi']
       iface_wired=request.form['iface_wired']
       iface_ap=request.form['iface_ap']
+      iface_scan=iface_wifi
       wf.stop_ap()
       message = 'stopped AP'
 
@@ -84,6 +87,7 @@ def wifilist():
       iface_wifi=request.form['iface_wifi']
       iface_wired=request.form['iface_wired']
       iface_ap=request.form['iface_ap']
+      iface_scan=iface_wifi
 
       if iface_ap != "unset" and iface_wired != "unset":
         wf.connect_vpn(request.form['vpn_config'],iface_ap=iface_ap)
@@ -103,15 +107,16 @@ def wifilist():
       iface_wired=request.form['iface_wired']
       iface_ap=request.form['iface_ap']
       iface_wifi=request.form['iface_wifi']
-      if iface_wifi != "unset":
-        aps = wf.get_aps2(iface=request.form['iface_scan'])
+      iface_scan=request.form['iface_scan']
+      if iface_scan != "unset":
+        aps = wf.get_aps2(iface=iface_scan)
         message = 'done scanning'
       else:
-        message = "Need to set wifi interface to scan!"
+        message = "Need to set interface to scan!"
 
   else: #Get request
-    if iface_wifi != "unset" :
-      aps = wf.get_aps(iface=iface_wifi)
+    if iface_scan != "unset" :
+      aps = wf.get_aps(iface=iface_scan)
     else:
       aps = []
       message = "need wifi interface to be set for AP list"
@@ -133,6 +138,12 @@ def wifilist():
     if 'ip' not in iface_info[iface_ap]  or iface_info[iface_ap]['ip'].find('.') <0:
       wf.start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', wifi_interface=iface_wifi, ap_interface=iface_ap)
       iface_info[iface_ap] = wf.get_connection_info(iface_ap)
+
+
+  #Add unset to the list of interfaces for the webpage:
+  iface_wifi_list.append("unset")
+  iface_wired_list.append("unset")
+
 
   return render_template("wifilist.html",aps = aps,
                          iface_info = iface_info,

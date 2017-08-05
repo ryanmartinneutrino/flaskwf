@@ -95,7 +95,6 @@ def connect_wifi(ssid, pwd, wifi_interface='wlan0', ap_interface='unset', ap_ip=
 
 
 
-#def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0', iface='wlan0', iface_eth='eth0'):
 def start_ap(ssid = 'flaskwf', pwd = '123flaskwf', subnet = '10.10.0.0',wifi_interface='unset', ap_interface='wlan0'):
   ''' Start an AP based on the passed parameters '''
 
